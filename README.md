@@ -13,6 +13,7 @@ The Solid server is hosted in [node-solid-server](https://github.com/solid/node-
 git clone https://github.com/solid/node-solid-server
 ```
 If we check the Docker file we can see that it is based in `8.11.2-onbuild`. This kind of node images **are deprecated**, so we are going to change this file to use a newer noder image:
+#### **`node-solid-server/Dockerfile`**
 ```
 FROM node:12.14.1
 EXPOSE 8443
@@ -42,4 +43,56 @@ Lets explain this docker file:
 If we want to test the server, we just need to run:
 ```
 docker build -t solidserver .
+docker run --name solidserver -p 8443:8443 solidserver
 ``` 
+If we go to https://localhost:8443 we can access our pod server. 
+
+## Step 2 - The webapp
+In this step we will prepare our sample webapp. Lets first clone the repository:
+```
+git clone https://github.com/solid/node-solid-server
+```
+Note: be careful not to clone this project inside the server. The directory structure should be:
+
+| projectdir
+|-- node-solid-server
+|-- profile-viewer-react
+
+Lets create a Dockerfile for this project:
+#### **`profile-viewer-react/Dockerfile`**
+```
+FROM node:12.14.1
+COPY . /app
+WORKDIR /app
+RUN npm install
+CMD ["npm", "start"]
+```
+So this Dockerfile is very simple. It justs uses the same base image as before (an image with node installed), we copy the app to the /app directory in the container, install the dependencies and start the server.
+
+If we want to start the webapp, we just need to run:
+```
+docker build -t solidwebapp .
+docker run --name solidwebapp -p 3000:3000 solidwebapp
+``` 
+If we go to https://localhost:3000 we can access our sample profile viewer. 
+
+## Step 3 - Integrating both parts
+Now we have two separate projects, the server and the webapp. We also have two docker files to build two images. Lets use **docker-compose** to automate the process of building and running this two parts. Create a new file docker-compose.yml in your project root directory:
+
+#### **`docker-compose.yml`**
+```
+version: '3'
+services:
+  solidserver:
+    build: ./node-solid-server/
+    ports:
+    - "8443:8443"
+  sampleweb:
+    build: ./profile-viewer-react/
+    ports:
+    - "3000:3000"
+```
+This file is very easy two understand. We define that our application has two services, the server and the webapp. We just need to tell docker where are the two parts and which port each part uses. Docker will go to each directory and look for a Dockerfile. It will then build each image and launch them. The final result will be a pod server and a profile viewer running as two docker instances using a fully automated process. The final step will be executing this docker-compose file:
+```
+docker-compose up
+```

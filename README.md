@@ -12,7 +12,7 @@ The Solid server is hosted in [node-solid-server](https://github.com/solid/node-
 ```
 git clone https://github.com/solid/node-solid-server
 ```
-If we check the Docker file we can see that it is based in `8.11.2-onbuild`. This kind of node images **are deprecated**, so we are going to change this file to use a newer noder image:
+If we check the Docker file we can see that it is based in `8.11.2-onbuild`. This kind of node images **are deprecated**, so we are going to change this file to use a newer node image:
 #### **`node-solid-server/Dockerfile`**
 ```
 FROM node:12.14.1

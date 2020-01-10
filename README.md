@@ -37,7 +37,7 @@ Lets explain this docker file:
 * We copy the application will be copied from local to the `/usr/src/app` dir in the image.
 * We install the dependencies defined in `packages.json` using `npm install`.
 * We copy the configuration file `config.json` (here we are using the default configuration but obviously this could be changed).
-* We generate a new self-signed certificate using `openssl`. This is only valid for development and for production we would have to get a valid certificate.
+* We generate a new self-signed certificate using `openssl`. This is only valid for development and for production we would have to get a valid certificate (see details [here](https://github.com/solid/node-solid-server).
 * We start the server.
 
 If we want to test the server, we just need to run:

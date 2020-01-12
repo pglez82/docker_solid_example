@@ -3,9 +3,9 @@ This example will be based in this two git repositories:
 * [node-solid-server](https://github.com/solid/node-solid-server)
 * [profile-viewer-react](https://github.com/solid/profile-viewer-react): very basic Solid example application. It just shows a the name of a Solid user and its friends. The important thing is that this project uses [solid-react-components](https://github.com/solid/react-components) and we can use it as a template for starting our own Solid application.
 
-The aim of this example is automate the build and deployment of a Solid server and the example profile viewer application using Docker. For this, we will use **docker-compose because** our system has two very different parts (the server and the webapp). Docker-compose allows us to deploy multiple containers easily.
+The aim of this example is automate the build and deployment of a Solid server and the example profile viewer application using Docker. For this, we will use **docker-compose** because our system has two very different parts (the server and the webapp). Docker-compose allows us to deploy multiple containers easily.
 
-Prerequisites: [Docker basics](https://github.com/pglez82/docker_cheatsheet/).
+Prerequisites: Understand the [Docker basics](https://github.com/pglez82/docker_cheatsheet/).
 
 ## Step 1 - The server
 The Solid server is hosted in [node-solid-server](https://github.com/solid/node-solid-server). If you browse the repository, you can see that this project already has a Dockerfile, that means it is prepared to be built as a Dockerimage. Lets start cloning the repository:
@@ -40,12 +40,16 @@ Lets explain this docker file:
 * We generate a new self-signed certificate using `openssl`. This is only valid for development and for production we would have to get a valid certificate (see details [here](https://github.com/solid/node-solid-server).
 * We start the server.
 
+Note: This Dockerfile has more lines than the original. The reason is that the `8.11.2-onbuild` image used in the original Dockerfile was designed to automatically pick the source code from the directory where the Dockerfile is. We are using a normal node image so we have to do this steps by hand.
+
 If we want to test the server, we just need to run:
 ```
 docker build -t solidserver .
 docker run --name solidserver -p 8443:8443 solidserver
 ``` 
 If we go to https://localhost:8443 we can access our pod server. 
+
+Note: If we create a pod in our server we should follow the instructions in [node-solid-server](https://github.com/solid/node-solid-server) in the section `Run multi-user server (intermediate)` in order to be able to access youruser.localhost.
 
 ## Step 2 - The webapp
 In this step we will prepare our sample webapp. Lets first clone the repository:

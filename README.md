@@ -43,7 +43,7 @@ Lets explain this docker file:
 Note: This Dockerfile has more lines than the original. The reason is that the `8.11.2-onbuild` image used in the original Dockerfile was designed to automatically pick the source code from the directory where the Dockerfile is. We are using a normal node image so we have to do this steps by hand.
 
 If we want to test the server, we just need to run:
-```
+```sh
 docker build -t solidserver .
 docker run --name solidserver -p 8443:8443 solidserver
 ``` 

@@ -9,7 +9,7 @@ Prerequisites: Understand the [Docker basics](https://github.com/pglez82/docker_
 
 ## Step 1 - The server
 The Solid server is hosted in [node-solid-server](https://github.com/solid/node-solid-server). If you browse the repository, you can see that this project already has a Dockerfile, that means it is prepared to be built as a Dockerimage. Lets start cloning the repository:
-```
+```bash
 git clone https://github.com/solid/node-solid-server
 ```
 If we check the Docker file we can see that it is based in `8.11.2-onbuild`. This kind of node images **are deprecated**, so we are going to change this file to use a newer node image:

@@ -37,7 +37,7 @@ Lets explain this docker file:
 * We copy the application will be copied from local to the `/usr/src/app` dir in the image.
 * We install the dependencies defined in `packages.json` using `npm install`.
 * We copy the configuration file `config.json` (here we are using the default configuration but obviously this could be changed).
-* We generate a new self-signed certificate using `openssl`. This is only valid for development and for production we would have to get a valid certificate (see details [here](https://github.com/solid/node-solid-server).
+* We generate a new self-signed certificate using `openssl`. This is only valid for development and for production we would have to get a valid certificate (see details [here](https://github.com/solid/node-solid-server)).
 * We start the server.
 
 Note: This Dockerfile has more lines than the original. The reason is that the `8.11.2-onbuild` image used in the original Dockerfile was designed to automatically pick the source code from the directory where the Dockerfile is. We are using a normal node image so we have to do this steps by hand.
@@ -50,6 +50,11 @@ docker run --name solidserver -p 8443:8443 solidserver
 If we go to https://localhost:8443 we can access our pod server. 
 
 Note: If we create a pod in our server we should follow the instructions in [node-solid-server](https://github.com/solid/node-solid-server) in the section `Run multi-user server (intermediate)` in order to be able to access youruser.localhost.
+You may need to configure your /etc/hosts file adding this line to:
+```
+127.0.0.1	*.localhost
+```
+In Windows, the `/etc/hosts` file is usually located at: `c:\Windows\System32\Drivers\etc\hosts`
 
 ## Step 2 - The webapp
 In this step we will prepare our sample webapp. Lets first clone the repository:

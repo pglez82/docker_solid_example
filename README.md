@@ -105,3 +105,8 @@ This file is very easy two understand. We define that our application has two se
 ```
 docker-compose up
 ```
+Also, if we change something in any of the projects, we need to recreate the images. In order to force `docker-compose` to recreate the images before launching the containers, it can be executed like this:
+```
+docker-compose up --force-recreate --build
+```
+```

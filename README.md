@@ -50,7 +50,7 @@ docker run --name solidserver -p 8443:8443 solidserver
 If we go to https://localhost:8443 we can access our pod server. 
 
 Note: If we create a pod in our server we should follow the instructions in [node-solid-server](https://github.com/solid/node-solid-server) in the section `Run multi-user server (intermediate)` in order to be able to access youruser.localhost.
-You may need to configure your /etc/hosts file adding this line to:
+You may need to configure your `/etc/hosts` file adding this line to:
 ```
 127.0.0.1	*.localhost
 ```

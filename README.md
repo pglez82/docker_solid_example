@@ -81,7 +81,14 @@ CMD ["npm", "start"]
 ```
 So this Dockerfile is very simple. It justs uses the same base image as before (an image with node installed), we copy the app to the /app directory in the container, install the dependencies and start the server.
 
-If we want to start the webapp, we just need to run:
+Sometimes is also important to have a `.dockerignore` file. This file is useful for ignoring some files or directories when building a docker image. Lets say that we build our application locally. For that we will use `npm install` and `npm run build`, which will create two directories: `node_modules` and `build`. We do not want these two directories to be used when building the image so we can include them in this file:
+#### **`profile-viewer-react/.dockerignore`**
+```
+node_modules
+build
+```
+
+Now, if we want to start the webapp, we just need to run:
 ```
 docker build -t solidwebapp .
 docker run --name solidwebapp -p 3000:3000 solidwebapp

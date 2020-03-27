@@ -45,8 +45,9 @@ Note: This Dockerfile has more lines than the original. The reason is that the `
 If we want to test the server, we just need to run:
 ```sh
 docker build -t solidserver .
-docker run --name solidserver -p 8443:8443 solidserver
+docker run --name solidserver --rm -d -p 8443:8443 solidserver
 ``` 
+Note: `--rm` flag means that the container will be removed after stoping it and `-d` flag allow us to execute the container as a daemon (non iteractive)
 If we go to https://localhost:8443 we can access our pod server. 
 
 Note: If we create a pod in our server we should follow the instructions in [node-solid-server](https://github.com/solid/node-solid-server) in the section `Run multi-user server (intermediate)` in order to be able to access youruser.localhost.
@@ -55,6 +56,8 @@ You may need to configure your `/etc/hosts` file adding this line to:
 127.0.0.1	*.localhost
 ```
 In Windows, the `/etc/hosts` file is usually located at: `c:\Windows\System32\Drivers\etc\hosts`
+
+The problem here is after stoping the server with `docker stop solidserver`, all the data that could be stored in the pod server will be lost. Maybe this is what we want (in case we are doing tests), or maybe we want to make sure that the pods data is stored outside the container. For this we will use **volumes** in step 3.
 
 ## Step 2 - The webapp
 In this step we will prepare our sample webapp. Lets first clone the repository:
@@ -94,19 +97,31 @@ version: '3'
 services:
   solidserver:
     build: ./node-solid-server/
+    volumes:
+      - ./volumes/soliddata:/usr/src/app/data
     ports:
-    - "8443:8443"
+      - "8443:8443"
   sampleweb:
     build: ./profile-viewer-react/
     ports:
-    - "3000:3000"
+      - "3000:3000"
+volumes:
+  soliddata:
+    external: false
 ```
+
 This file is very easy two understand. We define that our application has two services, the server and the webapp. We just need to tell docker where are the two parts and which port each part uses. Docker will go to each directory and look for a Dockerfile. It will then build each image and launch them. The final result will be a pod server and a profile viewer running as two docker instances using a fully automated process. The final step will be executing this docker-compose file:
 ```
-docker-compose up
+docker-compose up -d
 ```
-Also, if we change something in any of the projects, we need to recreate the images. In order to force `docker-compose` to recreate the images before launching the containers, it can be executed like this:
+In order to stop both containers we can use:
+```
+docker-compose down
+```
+
+Also, appart from the services we have defined a volume (with name soliddata). This is were the users pods will be stored. We map the host directory `volumes/soliddata` (relative to `docker-compose.yml`) with the container directory `/usr/src/app/data` which is the dir where solid stores the profiles. This way we ensure that even after removing the containers (which happens when we execute `docker-compose down`) our data will persist, and if we start them up again, the pods data will be available.
+
+Also, if we change something in any of the projects (for instance, a change in the profile viewer), we need to recreate the images. In order to force `docker-compose` to recreate the images before launching the containers, it can be executed like this:
 ```
 docker-compose up --force-recreate --build
-```
 ```

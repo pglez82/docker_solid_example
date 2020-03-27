@@ -106,6 +106,7 @@ services:
     build: ./node-solid-server/
     volumes:
       - ./volumes/soliddata:/usr/src/app/data
+      - ./volumes/soliddb:/usr/src/app/.db
     ports:
       - "8443:8443"
   sampleweb:
@@ -114,6 +115,8 @@ services:
       - "3000:3000"
 volumes:
   soliddata:
+    external: false
+  soliddb:
     external: false
 ```
 
@@ -126,7 +129,7 @@ In order to stop both containers we can use:
 docker-compose down
 ```
 
-Also, appart from the services we have defined a volume (with name soliddata). This is were the users pods will be stored. We map the host directory `volumes/soliddata` (relative to `docker-compose.yml`) with the container directory `/usr/src/app/data` which is the dir where solid stores the profiles. This way we ensure that even after removing the containers (which happens when we execute `docker-compose down`) our data will persist, and if we start them up again, the pods data will be available.
+Also, appart from the services we have defined a volume (with name soliddata). This is were the users pods will be stored. We map the host directory `volumes/soliddata` (relative to `docker-compose.yml`) with the container directory `/usr/src/app/data` which is the dir where solid stores the profiles. We also do the same with the passwords that are stored in the `.db` folder using a second volume. This way we ensure that even after removing the containers (which happens when we execute `docker-compose down`) our data will persist, and if we start them up again, the pods data will be available.
 
 Also, if we change something in any of the projects (for instance, a change in the profile viewer), we need to recreate the images. In order to force `docker-compose` to recreate the images before launching the containers, it can be executed like this:
 ```

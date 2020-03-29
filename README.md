@@ -95,6 +95,18 @@ docker run --name solidwebapp -p 3000:3000 solidwebapp
 ``` 
 If we go to https://localhost:3000 we can access our sample profile viewer. 
 
+As you may notice here, I am using npm start in order to launch the application. Obviously this is good for development but not suitable for production. Here you have another `Dockerfile` example that will build the react application and deploy using a better http server:
+#### **`profile-viewer-react/Dockerfile`**
+```
+FROM node:12.14.1
+COPY . /app
+WORKDIR /app
+RUN npm install
+RUN npm run build
+RUN npm install -g http-server
+CMD http-server build -p 3000
+```
+
 ## Step 3 - Integrating both parts
 Now we have two separate projects, the server and the webapp. We also have two docker files to build two images. Lets use **docker-compose** to automate the process of building and running this two parts. Create a new file docker-compose.yml in your project root directory:
 

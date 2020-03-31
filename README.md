@@ -148,3 +148,13 @@ Also, if we change something in any of the projects (for instance, a change in t
 docker-compose up --force-recreate --build
 ```
 ## Load tests (Gattling)
+In order to use Gattling for doing the load tests in our application we need to [download](https://gatling.io/open-source/start-testing/) it. Basically, the program has to parts, a recorder to capture the actions that we want to test and a program to run this actions and get the results. Gattling will take care of capture all the response times in our requests and presenting them in quite useful graphics for its posterior analysis.
+
+Once we have downloaded Gattling we need to start the recorder. This works as a proxy that intercepts all the actions that we make in our browser. That means that we have to configure our browser to use a proxy.
+
+![Gattling proxy](images/gattling1.png?raw=true "Gattling 1")
+
+In this case the proxy will work in the port 8000. Now we need to tell Firefox that we want to use this proxy. Here is important to note that Firefox by deffault will not use a proxy if the address is localhost. In order to do this, we need to set the property `network.proxy.allow_hijacking_localhost` to `true` in `about:config`. 
+
+**Important note**: We are setting this example having the application in the same machine than Gattling. This is not a good practise as Gattling generates overhead in the machine that affect the tests. One good way of doing the test is using a service like Amazon AWS or Google Cloud. This way we can deploy the application there using docker and launch the Gattling load tests from our local machine. Another advantage of this system is that we will be able to test different server machines (increase RAM, number of cores, etc) until we reach the performance that we need for our application. Also, depending on the type of application it will be possible to deploy the application using multimple containers and use a load balancer, so our application will be more scalable. 
+

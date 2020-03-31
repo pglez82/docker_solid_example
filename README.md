@@ -156,5 +156,91 @@ Once we have downloaded Gattling we need to start the recorder. This works as a 
 
 In this case the proxy will work in the port 8000. Now we need to tell Firefox that we want to use this proxy. Here is important to note that Firefox by deffault will not use a proxy if the address is localhost. In order to do this, we need to set the property `network.proxy.allow_hijacking_localhost` to `true` in `about:config`. 
 
-**Important note**: We are setting this example having the application in the same machine than Gattling. This is not a good practise as Gattling generates overhead in the machine that affect the tests. One good way of doing the test is using a service like Amazon AWS or Google Cloud. This way we can deploy the application there using docker and launch the Gattling load tests from our local machine. Another advantage of this system is that we will be able to test different server machines (increase RAM, number of cores, etc) until we reach the performance that we need for our application. Also, depending on the type of application it will be possible to deploy the application using multimple containers and use a load balancer, so our application will be more scalable. 
+**Important note**: We are setting this example having the application in the same machine than Gattling. This is not a good practice as Gattling generates overhead in the machine that affect the tests. One good way of doing the test is using a service like Amazon AWS or Google Cloud. This way we can deploy the application there using docker and launch the Gattling load tests from our local machine. Another advantage of this system is that we will be able to test different server machines (increase RAM, number of cores, etc) until we reach the performance that we need for our application. Also, depending on the type of application it will be possible to deploy the application using multiple containers and use a load balancer, so our application will be more scalable. 
+
+Once we have the recorder configured, and the application running (server and webapp), we can start recording our first test. We must specify a package and class name. This is just for test organization. Package will be a folder and Class name the name of the test. In my case I have used `profileviewer` and `LoadTestLoginExample`. I have also pressed the button `No static resources` so the file won't get to complex with two many petitions. After pressing start the recorder will start capturing our actions in the browser. So here you should perform all the the actions that you want to record. In this example we will be recording the login process. Here is the resulting file, in [Scala](https://www.scala-lang.org/):
+
+```scala
+package profileviewer
+
+import scala.concurrent.duration._
+
+import io.gatling.core.Predef._
+import io.gatling.http.Predef._
+import io.gatling.jdbc.Predef._
+
+class LoadTestLoginExample extends Simulation {
+
+	val httpProtocol = http
+		.baseUrl("https://localhost:8443")
+		.inferHtmlResources(BlackList(""".*\.js""", """.*\.css""", """.*\.gif""", """.*\.jpeg""", """.*\.jpg""", """.*\.ico""", """.*\.woff""", """.*\.woff2""", """.*\.(t|o)tf""", """.*\.png""", """.*detectportal\.firefox\.com.*"""), WhiteList())
+		.acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+		.acceptEncodingHeader("gzip, deflate")
+		.acceptLanguageHeader("en-US,en;q=0.5")
+		.doNotTrackHeader("1")
+		.userAgentHeader("Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0")
+
+	val headers_0 = Map(
+		"Accept-Encoding" -> "gzip, deflate",
+		"Upgrade-Insecure-Requests" -> "1")
+
+	val headers_2 = Map(
+		"Accept" -> "*/*",
+		"Origin" -> "http://localhost:3000")
+
+	val headers_4 = Map(
+		"Accept" -> "*/*",
+		"Content-Type" -> "application/json",
+		"Origin" -> "http://localhost:3000")
+
+	val headers_5 = Map("Upgrade-Insecure-Requests" -> "1")
+
+	val headers_6 = Map(
+		"Origin" -> "https://localhost:8443",
+		"Upgrade-Insecure-Requests" -> "1")
+
+    val uri1 = "localhost"
+
+	val scn = scenario("LoadTestLoginExample")
+		.exec(http("request_0")
+			.get("http://" + uri1 + ":3000/")
+			.headers(headers_0))
+		.pause(1,5)
+		.exec(http("request_1")
+			.get("http://" + uri1 + ":3000/popup.html")
+			.headers(headers_0))
+		.pause(1,5)
+		.exec(http("request_2")
+			.get("/.well-known/openid-configuration")
+			.headers(headers_2)
+			.resources(http("request_3")
+			.get("/jwks")
+			.headers(headers_2),
+            http("request_4")
+			.post("/register")
+			.headers(headers_4)
+			.body(RawFileBody("profileviewer/loadtestloginexample/0004_request.json")),
+            http("request_5")
+			.get("/authorize?scope=openid&client_id=19442505d23842d599e13d84a8f2e01e&response_type=id_token%20token&request=eyJhbGciOiJub25lIn0.eyJyZWRpcmVjdF91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvcG9wdXAuaHRtbCIsImRpc3BsYXkiOiJwYWdlIiwibm9uY2UiOiJVUVdmcVZ2alI4ZDhGZ0h5V2RyakJ4cGlkUWFTdWNtd1FPd1RZRlAtV25FIiwia2V5Ijp7ImFsZyI6IlJTMjU2IiwiZSI6IkFRQUIiLCJleHQiOnRydWUsImtleV9vcHMiOlsidmVyaWZ5Il0sImt0eSI6IlJTQSIsIm4iOiJ1MHU5amNTQVlpa3Rtd3RXUGp6YXViajV1WE5zcTJmbmxUTVVpQzB5YW5pZERybW1LZ0lQeXd2a0tfWUZ3RmVmWm9zN052M0wxZEdGekMtamRFelloWDN5NnZMa2otYVoxSUV4bTRRN0hET2c2MC1xZEJVa0d1bXJOM1UyZmFJcko1dWEySEROOWZGN2dIek5fQ0g2UXR2ZWJuSHQ3RF82cVVhcWJWNEJSRGtRWTJDbWdyX2otMzh3LUZfZ0M2dThCdDA2VG14NkUxNzlVem1vTVNJa0RlQzhGN2dZbDd3Y19nMFNjZEZTZWptNHhSdnZmOTdQZmR5WEYyRFp1S29jMlRpRGtYLWsxN040VS1xQ0tzd216RTFBdFJTdlVwRjdTd3IwY3hhdUZUbmNWYjVWbnRfS3lxbWMzV3Z4ejNwQ1hvbHA2UndseXVBUFczdGRmZUdWWHcifX0.&state=-jlhEX87x67O8V6C3Fts4RN89uFLxHR9aasImLFFTvs")
+			.headers(headers_5)))
+		.pause(1,5)
+		.exec(http("request_6")
+			.post("/login/password")
+			.headers(headers_6)
+			.formParam("username", "testaccount")
+			.formParam("password", "Testaccount_123")
+			.formParam("response_type", "id_token token")
+			.formParam("display", "")
+			.formParam("scope", "openid")
+			.formParam("client_id", "19442505d23842d599e13d84a8f2e01e")
+			.formParam("redirect_uri", "http://localhost:3000/popup.html")
+			.formParam("state", "-jlhEX87x67O8V6C3Fts4RN89uFLxHR9aasImLFFTvs")
+			.formParam("nonce", "")
+			.formParam("request", "eyJhbGciOiJub25lIn0.eyJyZWRpcmVjdF91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvcG9wdXAuaHRtbCIsImRpc3BsYXkiOiJwYWdlIiwibm9uY2UiOiJVUVdmcVZ2alI4ZDhGZ0h5V2RyakJ4cGlkUWFTdWNtd1FPd1RZRlAtV25FIiwia2V5Ijp7ImFsZyI6IlJTMjU2IiwiZSI6IkFRQUIiLCJleHQiOnRydWUsImtleV9vcHMiOlsidmVyaWZ5Il0sImt0eSI6IlJTQSIsIm4iOiJ1MHU5amNTQVlpa3Rtd3RXUGp6YXViajV1WE5zcTJmbmxUTVVpQzB5YW5pZERybW1LZ0lQeXd2a0tfWUZ3RmVmWm9zN052M0wxZEdGekMtamRFelloWDN5NnZMa2otYVoxSUV4bTRRN0hET2c2MC1xZEJVa0d1bXJOM1UyZmFJcko1dWEySEROOWZGN2dIek5fQ0g2UXR2ZWJuSHQ3RF82cVVhcWJWNEJSRGtRWTJDbWdyX2otMzh3LUZfZ0M2dThCdDA2VG14NkUxNzlVem1vTVNJa0RlQzhGN2dZbDd3Y19nMFNjZEZTZWptNHhSdnZmOTdQZmR5WEYyRFp1S29jMlRpRGtYLWsxN040VS1xQ0tzd216RTFBdFJTdlVwRjdTd3IwY3hhdUZUbmNWYjVWbnRfS3lxbWMzV3Z4ejNwQ1hvbHA2UndseXVBUFczdGRmZUdWWHcifX0.")
+			.check(status.is(302)))
+
+	setUp(scn.inject(atOnceUsers(20))).protocols(httpProtocol)
+}
+```
+
 

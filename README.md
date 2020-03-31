@@ -260,3 +260,43 @@ and if we change the simulation to 50 users:
 
 we can see how the response times start to degrade. Obviously the results page provides us with much more information that we can analyze.
 
+###Using docker to execute the load tests
+Here is another option to execute the tests. We are going to use docker-compose to start the server and the web, and then launch the tests. Here is how it will be done, starting with the previous docker-compose file.
+
+#### **`docker-compose.yml`**
+```
+version: '3'
+services:
+  solidserver:
+    build: ./node-solid-server/
+    volumes:
+      - ./volumes/soliddata:/usr/src/app/data
+      - ./volumes/soliddb:/usr/src/app/.db
+    ports:
+      - "8443:8443"
+  sampleweb:
+    build: ./profile-viewer-react/
+    ports:
+      - "3000:3000"
+  gattling:
+    image: denvazh/gatling
+    command: -s profileviewer.LoadTestLoginExample
+    depends_on:
+      - solidserver
+      - sampleweb
+    volumes:
+      - absolutepathtogattling/conf:/opt/gatling/conf
+      - absolutepathtogattling/user-files:/opt/gatling/user-files
+      - absolutepathtogattling/results:/opt/gatling/results
+    network_mode: "host"
+volumes:
+  soliddata:
+    external: false
+  soliddb:
+    external: false
+```
+A few notes about this file:
+- We have defined a third service that depends on the other two (we want to wait that the solid server and the website are launched before starting the test.
+- This service is based on the `denvazh/gatling`. It is not updated to the last gattling version but it works. We always have the option of building our own gattling image based on his `Dockerfile` if we need to.
+- With command we can pass parameters to `gattling.sh`, so we can decide which tests to execute.
+- The `network_mode` should be established to `host` for this service. That means that this container will be able to access the host network, thus, it will be able to access http://localhost:3000 and https://localhost:8443.

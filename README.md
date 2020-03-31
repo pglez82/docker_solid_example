@@ -62,7 +62,7 @@ The problem here is after stoping the server with `docker stop solidserver`, all
 ## Step 2 - The webapp
 In this step we will prepare our sample webapp. Lets first clone the repository:
 ```
-git clone https://github.com/solid/node-solid-server
+git clone https://github.com/solid/profile-viewer-react
 ```
 Note: be careful not to clone this project inside the server. The directory structure should be:
 

@@ -147,20 +147,20 @@ Also, if we change something in any of the projects (for instance, a change in t
 ```
 docker-compose up --force-recreate --build
 ```
-## Load tests (Gattling)
-In order to use Gattling for doing the load tests in our application we need to [download](https://gatling.io/open-source/start-testing/) it. Basically, the program has to parts, a recorder to capture the actions that we want to test and a program to run this actions and get the results. Gattling will take care of capture all the response times in our requests and presenting them in quite useful graphics for its posterior analysis.
+## Load tests (Gatling)
+In order to use Gatling for doing the load tests in our application we need to [download](https://gatling.io/open-source/start-testing/) it. Basically, the program has to parts, a recorder to capture the actions that we want to test and a program to run this actions and get the results. Gatling will take care of capture all the response times in our requests and presenting them in quite useful graphics for its posterior analysis.
 
-Once we have downloaded Gattling we need to start the recorder. This works as a proxy that intercepts all the actions that we make in our browser. That means that we have to configure our browser to use a proxy.
+Once we have downloaded Gatling we need to start the recorder. This works as a proxy that intercepts all the actions that we make in our browser. That means that we have to configure our browser to use a proxy.
 
-![Gattling proxy](images/gattling1.png?raw=true "Gattling 1")
+![Gatling proxy](images/gattling1.png?raw=true "Gatling 1")
 
 In this case the proxy will work in the port 8000. Now we need to tell Firefox that we want to use this proxy. Here is important to note that Firefox by deffault will not use a proxy if the address is localhost. In order to do this, we need to set the property `network.proxy.allow_hijacking_localhost` to `true` in `about:config`. 
 
-**Important note**: We are setting this example having the application in the same machine than Gattling. This is not a good practice as Gattling generates overhead in the machine that affect the tests. One good way of doing the test is using a service like Amazon AWS or Google Cloud. This way we can deploy the application there using docker and launch the Gattling load tests from our local machine. Another advantage of this system is that we will be able to test different server machines (increase RAM, number of cores, etc) until we reach the performance that we need for our application. Also, depending on the type of application it will be possible to deploy the application using multiple containers and use a load balancer, so our application will be more scalable. 
+**Important note**: We are setting this example having the application in the same machine than Gatling. This is not a good practice as Gatling generates overhead in the machine that affect the tests. One good way of doing the test is using a service like Amazon AWS or Google Cloud. This way we can deploy the application there using docker and launch the Gatling load tests from our local machine. Another advantage of this system is that we will be able to test different server machines (increase RAM, number of cores, etc) until we reach the performance that we need for our application. Also, depending on the type of application it will be possible to deploy the application using multiple containers and use a load balancer, so our application will be more scalable. 
 
 Once we have the recorder configured, and the application running (server and webapp), we can start recording our first test. We must specify a package and class name. This is just for test organization. Package will be a folder and Class name the name of the test. In my case I have used `profileviewer` and `LoadTestLoginExample`. I have also pressed the button `No static resources` so the file won't get to complex with two many petitions. After pressing start the recorder will start capturing our actions in the browser. So here you should perform all the the actions that you want to record. In this example we will be recording the login process. Here is the resulting file, in [Scala](https://www.scala-lang.org/):
 
-#### **`gattlingdir/user-files/simulations/profileviewer/LoadTestLoginExample.scala`**
+#### **`gatlingdir/user-files/simulations/profileviewer/LoadTestLoginExample.scala`**
 ```scala
 package profileviewer
 
@@ -252,11 +252,11 @@ Now that we have a test, we can execute it:
 ```
 The results will be then stored in the results folder. For instance for our 20 users simulation:
 
-![Gattling with 20 users](images/gattling20.png?raw=true "Gattling 20 users")
+![Gatling with 20 users](images/gattling20.png?raw=true "Gatling 20 users")
 
 and if we change the simulation to 50 users:
 
-![Gattling with 50 users](images/gattling50.png?raw=true "Gattling 50 users")
+![Gatling with 50 users](images/gattling50.png?raw=true "Gatling 50 users")
 
 we can see how the response times start to degrade. Obviously the results page provides us with much more information that we can analyze.
 
@@ -278,16 +278,16 @@ services:
     build: ./profile-viewer-react/
     ports:
       - "3000:3000"
-  gattling:
+  gatling:
     image: denvazh/gatling
     command: -s profileviewer.LoadTestLoginExample
     depends_on:
       - solidserver
       - sampleweb
     volumes:
-      - absolutepathtogattling/conf:/opt/gatling/conf
-      - absolutepathtogattling/user-files:/opt/gatling/user-files
-      - absolutepathtogattling/results:/opt/gatling/results
+      - absolutepathtogatling/conf:/opt/gatling/conf
+      - absolutepathtogatling/user-files:/opt/gatling/user-files
+      - absolutepathtogatling/results:/opt/gatling/results
     network_mode: "host"
 volumes:
   soliddata:
@@ -297,8 +297,8 @@ volumes:
 ```
 A few notes about this file:
 - We have defined a third service that depends on the other two (we want to wait that the solid server and the website are launched before starting the test.
-- This service is based on the `denvazh/gatling`. It is not updated to the last gattling version but it works. We always have the option of building our own gattling image based on his `Dockerfile` if we need to.
-- With command we can pass parameters to `gattling.sh`, so we can decide which tests to execute.
+- This service is based on the `denvazh/gatling`. It is not updated to the last gatling version but it works. We always have the option of building our own gatling image based on his `Dockerfile` if we need to.
+- With command we can pass parameters to `gatling.sh`, so we can decide which tests to execute.
 - The `network_mode` should be established to `host` for this service. That means that this container will be able to access the host network, thus, it will be able to access http://localhost:3000 and https://localhost:8443.
 
 Finally, in order to run the tests we only need to run:

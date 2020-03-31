@@ -147,3 +147,4 @@ Also, if we change something in any of the projects (for instance, a change in t
 ```
 docker-compose up --force-recreate --build
 ```
+## Load tests (Gattling)

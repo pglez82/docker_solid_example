@@ -160,6 +160,7 @@ In this case the proxy will work in the port 8000. Now we need to tell Firefox t
 
 Once we have the recorder configured, and the application running (server and webapp), we can start recording our first test. We must specify a package and class name. This is just for test organization. Package will be a folder and Class name the name of the test. In my case I have used `profileviewer` and `LoadTestLoginExample`. I have also pressed the button `No static resources` so the file won't get to complex with two many petitions. After pressing start the recorder will start capturing our actions in the browser. So here you should perform all the the actions that you want to record. In this example we will be recording the login process. Here is the resulting file, in [Scala](https://www.scala-lang.org/):
 
+#### **`gattlingdir/user-files/simulations/profileviewer/LoadTestLoginExample.scala`**
 ```scala
 package profileviewer
 
@@ -242,5 +243,20 @@ class LoadTestLoginExample extends Simulation {
 	setUp(scn.inject(atOnceUsers(20))).protocols(httpProtocol)
 }
 ```
+The only two things that I have touched in this file is the `pause` function calls. I have set them to be an interval between 1 an 5 seconds, and also, the `atOnceUsers` function parameter. This is a critical parameter that we will have to adjust depending our requirements.
 
+Now that we have a test, we can execute it:
+
+```bash
+./gatling.sh -s profileviewer.LoadTestLoginExample
+```
+The results will be then stored in the results folder. For instance for our 20 users simulation:
+
+![Gattling with 20 users](images/gattling20.png?raw=true "Gattling 20 users")
+
+and if we change the simulation to 50 users:
+
+![Gattling with 50 users](images/gattling50.png?raw=true "Gattling 50 users")
+
+we can see how the response times start to degrade. Obviously the results page provides us with much more information that we can analyze.
 

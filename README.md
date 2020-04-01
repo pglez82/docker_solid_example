@@ -160,7 +160,7 @@ In this case the proxy will work in the port 8000. Now we need to tell Firefox t
 
 Once we have the recorder configured, and the application running (server and webapp), we can start recording our first test. We must specify a package and class name. This is just for test organization. Package will be a folder and Class name the name of the test. In my case I have used `profileviewer` and `LoadTestLoginExample`. I have also pressed the button `No static resources` so the file won't get to complex with two many petitions. After pressing start the recorder will start capturing our actions in the browser. So here you should perform all the the actions that you want to record. In this example we will be recording the login process. Here is the resulting file, in [Scala](https://www.scala-lang.org/).
 
-**Important note**: This test assume that we have created the acccount testaccount/Testaccount_123 in our solid server. Also that we have configured the hosts file so this profile is accesibile.
+**Important note**: This test assume that we have created the acccount testaccount/Testaccount_123 in our solid server. Also that we have configured the `hosts` file so this profile is accesibile.
 
 #### **`gatlingdir/user-files/simulations/profileviewer/LoadTestLoginExample.scala`**
 ```scala

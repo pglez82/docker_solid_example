@@ -187,70 +187,33 @@ class LoadTestLoginExample extends Simulation {
 		.acceptEncodingHeader("gzip, deflate")
 		.acceptLanguageHeader("en-US,en;q=0.5")
 		.doNotTrackHeader("1")
+		.upgradeInsecureRequestsHeader("1")
 		.userAgentHeader("Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0")
 
-	val headers_0 = Map(
-		"Accept-Encoding" -> "gzip, deflate",
-		"Upgrade-Insecure-Requests" -> "1")
-
-	val headers_2 = Map(
-		"Accept" -> "*/*",
-		"Origin" -> "http://localhost:3000")
-
-	val headers_4 = Map(
-		"Accept" -> "*/*",
-		"Content-Type" -> "application/json",
-		"Origin" -> "http://localhost:3000")
-
-	val headers_5 = Map("Upgrade-Insecure-Requests" -> "1")
-
-	val headers_6 = Map(
-		"Origin" -> "https://localhost:8443",
-		"Upgrade-Insecure-Requests" -> "1")
-
-    val uri1 = "localhost"
+	val headers_1 = Map("Origin" -> "https://localhost:8443")
 
 	val scn = scenario("LoadTestLoginExample")
 		.exec(http("request_0")
-			.get("http://" + uri1 + ":3000/")
-			.headers(headers_0))
+			.get("/authorize?scope=openid&client_id=b8076921b541837d3effb125238882ed&response_type=id_token%20token&request=eyJhbGciOiJub25lIn0.eyJyZWRpcmVjdF91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvcG9wdXAuaHRtbCIsImRpc3BsYXkiOiJwYWdlIiwibm9uY2UiOiIzdGZ4MURZUElsbTBpRUlLa25EQjJROUFobUd4dUtXVXJRTWlzek4zOGo4Iiwia2V5Ijp7ImFsZyI6IlJTMjU2IiwiZSI6IkFRQUIiLCJleHQiOnRydWUsImtleV9vcHMiOlsidmVyaWZ5Il0sImt0eSI6IlJTQSIsIm4iOiIwa1k5MjdXdF9jcmZBbTJVVmJHZk9VZUVJZGNYMXlnM0JhVkNfb1lDSHhqeUZTWF92dmprbV9KQVFUOV9udmhfVVFDZ05wTkFnejNBbGJleGg4emVnd2pOZHpUOUdaN3luZWRMSTJONF95Q2s5Y0plU0JlZnNlZm9hY0xLcTA1cFNORHBhLVNDMmhxZTJwSTg2bTZCYk45Y1BSM0E5azlmaDVqcnZqTmFKT2c1Z0pwdXhmY21faGlIUFhZMno3NXc5OVNQR3lsX0hCNmQ4eG9XN3BXdjBJNHBORmpBS0JzYjlqUmVuMHlQVHQyd1JDZ3Y0bzBmTnMyWG9ScUNXS0h3dUp5c0xCUjkzOXBYZUNqOWw2VWk3TVlGdnJsS2FlcUFFZzdFc3dlNWtBaE9qbGsxR2VhR3B0UkNXSzlqRlB4RllmRnQzbGV3QlJ0NE5xLXpBNklSalEifX0.&state=WRhXyLc-xvN647woQD22RnxJ39nw5IFsPTjmWr3ksv0"))
 		.pause(1,5)
 		.exec(http("request_1")
-			.get("http://" + uri1 + ":3000/popup.html")
-			.headers(headers_0))
-		.pause(1,5)
-		.exec(http("request_2")
-			.get("/.well-known/openid-configuration")
-			.headers(headers_2)
-			.resources(http("request_3")
-			.get("/jwks")
-			.headers(headers_2),
-            http("request_4")
-			.post("/register")
-			.headers(headers_4)
-			.body(RawFileBody("profileviewer/loadtestloginexample/0004_request.json")),
-            http("request_5")
-			.get("/authorize?scope=openid&client_id=19442505d23842d599e13d84a8f2e01e&response_type=id_token%20token&request=eyJhbGciOiJub25lIn0.eyJyZWRpcmVjdF91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvcG9wdXAuaHRtbCIsImRpc3BsYXkiOiJwYWdlIiwibm9uY2UiOiJVUVdmcVZ2alI4ZDhGZ0h5V2RyakJ4cGlkUWFTdWNtd1FPd1RZRlAtV25FIiwia2V5Ijp7ImFsZyI6IlJTMjU2IiwiZSI6IkFRQUIiLCJleHQiOnRydWUsImtleV9vcHMiOlsidmVyaWZ5Il0sImt0eSI6IlJTQSIsIm4iOiJ1MHU5amNTQVlpa3Rtd3RXUGp6YXViajV1WE5zcTJmbmxUTVVpQzB5YW5pZERybW1LZ0lQeXd2a0tfWUZ3RmVmWm9zN052M0wxZEdGekMtamRFelloWDN5NnZMa2otYVoxSUV4bTRRN0hET2c2MC1xZEJVa0d1bXJOM1UyZmFJcko1dWEySEROOWZGN2dIek5fQ0g2UXR2ZWJuSHQ3RF82cVVhcWJWNEJSRGtRWTJDbWdyX2otMzh3LUZfZ0M2dThCdDA2VG14NkUxNzlVem1vTVNJa0RlQzhGN2dZbDd3Y19nMFNjZEZTZWptNHhSdnZmOTdQZmR5WEYyRFp1S29jMlRpRGtYLWsxN040VS1xQ0tzd216RTFBdFJTdlVwRjdTd3IwY3hhdUZUbmNWYjVWbnRfS3lxbWMzV3Z4ejNwQ1hvbHA2UndseXVBUFczdGRmZUdWWHcifX0.&state=-jlhEX87x67O8V6C3Fts4RN89uFLxHR9aasImLFFTvs")
-			.headers(headers_5)))
-		.pause(1,5)
-		.exec(http("request_6")
 			.post("/login/password")
-			.headers(headers_6)
+			.headers(headers_1)
 			.formParam("username", "testaccount")
-			.formParam("password", "Testaccount_123")
+			.formParam("password", "Test_account123")
 			.formParam("response_type", "id_token token")
 			.formParam("display", "")
 			.formParam("scope", "openid")
-			.formParam("client_id", "19442505d23842d599e13d84a8f2e01e")
+			.formParam("client_id", "b8076921b541837d3effb125238882ed")
 			.formParam("redirect_uri", "http://localhost:3000/popup.html")
-			.formParam("state", "-jlhEX87x67O8V6C3Fts4RN89uFLxHR9aasImLFFTvs")
+			.formParam("state", "WRhXyLc-xvN647woQD22RnxJ39nw5IFsPTjmWr3ksv0")
 			.formParam("nonce", "")
-			.formParam("request", "eyJhbGciOiJub25lIn0.eyJyZWRpcmVjdF91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvcG9wdXAuaHRtbCIsImRpc3BsYXkiOiJwYWdlIiwibm9uY2UiOiJVUVdmcVZ2alI4ZDhGZ0h5V2RyakJ4cGlkUWFTdWNtd1FPd1RZRlAtV25FIiwia2V5Ijp7ImFsZyI6IlJTMjU2IiwiZSI6IkFRQUIiLCJleHQiOnRydWUsImtleV9vcHMiOlsidmVyaWZ5Il0sImt0eSI6IlJTQSIsIm4iOiJ1MHU5amNTQVlpa3Rtd3RXUGp6YXViajV1WE5zcTJmbmxUTVVpQzB5YW5pZERybW1LZ0lQeXd2a0tfWUZ3RmVmWm9zN052M0wxZEdGekMtamRFelloWDN5NnZMa2otYVoxSUV4bTRRN0hET2c2MC1xZEJVa0d1bXJOM1UyZmFJcko1dWEySEROOWZGN2dIek5fQ0g2UXR2ZWJuSHQ3RF82cVVhcWJWNEJSRGtRWTJDbWdyX2otMzh3LUZfZ0M2dThCdDA2VG14NkUxNzlVem1vTVNJa0RlQzhGN2dZbDd3Y19nMFNjZEZTZWptNHhSdnZmOTdQZmR5WEYyRFp1S29jMlRpRGtYLWsxN040VS1xQ0tzd216RTFBdFJTdlVwRjdTd3IwY3hhdUZUbmNWYjVWbnRfS3lxbWMzV3Z4ejNwQ1hvbHA2UndseXVBUFczdGRmZUdWWHcifX0.")
-			.check(status.is(302)))
+			.formParam("request", "eyJhbGciOiJub25lIn0.eyJyZWRpcmVjdF91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvcG9wdXAuaHRtbCIsImRpc3BsYXkiOiJwYWdlIiwibm9uY2UiOiIzdGZ4MURZUElsbTBpRUlLa25EQjJROUFobUd4dUtXVXJRTWlzek4zOGo4Iiwia2V5Ijp7ImFsZyI6IlJTMjU2IiwiZSI6IkFRQUIiLCJleHQiOnRydWUsImtleV9vcHMiOlsidmVyaWZ5Il0sImt0eSI6IlJTQSIsIm4iOiIwa1k5MjdXdF9jcmZBbTJVVmJHZk9VZUVJZGNYMXlnM0JhVkNfb1lDSHhqeUZTWF92dmprbV9KQVFUOV9udmhfVVFDZ05wTkFnejNBbGJleGg4emVnd2pOZHpUOUdaN3luZWRMSTJONF95Q2s5Y0plU0JlZnNlZm9hY0xLcTA1cFNORHBhLVNDMmhxZTJwSTg2bTZCYk45Y1BSM0E5azlmaDVqcnZqTmFKT2c1Z0pwdXhmY21faGlIUFhZMno3NXc5OVNQR3lsX0hCNmQ4eG9XN3BXdjBJNHBORmpBS0JzYjlqUmVuMHlQVHQyd1JDZ3Y0bzBmTnMyWG9ScUNXS0h3dUp5c0xCUjkzOXBYZUNqOWw2VWk3TVlGdnJsS2FlcUFFZzdFc3dlNWtBaE9qbGsxR2VhR3B0UkNXSzlqRlB4RllmRnQzbGV3QlJ0NE5xLXpBNklSalEifX0."))
 
 	setUp(scn.inject(atOnceUsers(20))).protocols(httpProtocol)
 }
 ```
+
 The only two things that I have touched in this file is the `pause` function calls. I have set them to be an interval between 1 an 5 seconds, and also, the `atOnceUsers` function parameter. This is a critical parameter that we will have to adjust depending our requirements.
 
 Now that we have a test, we can execute it:

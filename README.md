@@ -150,7 +150,9 @@ docker-compose up --force-recreate --build
 ## Load tests (Gatling)
 In order to use Gatling for doing the load tests in our application we need to [download](https://gatling.io/open-source/start-testing/) it. Basically, the program has two parts, a [recorder](https://gatling.io/docs/current/http/recorder) to capture the actions that we want to test and a program to run this actions and get the results. Gatling will take care of capture all the response times in our requests and presenting them in quite useful graphics for its posterior analysis.
 
-Once we have downloaded Gatling we need to start the recorder. This works as a proxy that intercepts all the actions that we make in our browser. That means that we have to configure our browser to use a proxy.
+Once we have downloaded Gatling we need to start the [recorder](https://gatling.io/docs/current/http/recorder). This works as a proxy that intercepts all the actions that we make in our browser. That means that we have to configure our browser to use a proxy. We have to follow this steps:
+
+1. 
 
 ![Gatling proxy](images/gatling1.png?raw=true "Gatling 1")
 

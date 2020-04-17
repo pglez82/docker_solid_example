@@ -147,3 +147,130 @@ Also, if we change something in any of the projects (for instance, a change in t
 ```
 docker-compose up --force-recreate --build
 ```
+## Load tests (Gatling)
+In order to use Gatling for doing the load tests in our application we need to [download](https://gatling.io/open-source/start-testing/) it. Basically, the program has two parts, a [recorder](https://gatling.io/docs/current/http/recorder) to capture the actions that we want to test and a program to run this actions and get the results. Gatling will take care of capture all the response times in our requests and presenting them in quite useful graphics for its posterior analysis.
+
+Once we have downloaded Gatling we need to start the [recorder](https://gatling.io/docs/current/http/recorder). This works as a proxy that intercepts all the actions that we make in our browser. That means that we have to configure our browser to use a proxy. We have to follow this steps:
+
+1. Configure the recorder in **HTTP proxy mode**.
+2. Configure the **HTTPs mode** to Certificate Authority.
+3. Generate a **CA certificate** and key. For this, press the Generate CA button. You will have to choose a folder to generate the certificates. Two pem files will be generated.
+4. Configure Firefox to use this **CA certificate** (Preferences>Certificates, import the generated certificate).
+5. Configure Firefox to use a **proxy** (Preferences>Network configuration). The proxy will be localhost:8000.
+6. Configure Firefox so it uses this proxy even if the call is to a local address. In order to do this, we need to set the property `network.proxy.allow_hijacking_localhost` to `true` in `about:config`. 
+
+
+![Gatling proxy](images/gatling1.png?raw=true "Gatling 1")
+
+**Important note**: We are setting this example having the application in the same machine than Gatling. This is not a good practice as Gatling generates overhead in the machine that affect the tests. One good way of doing the test is using a service like Amazon AWS or Google Cloud. This way we can deploy the application there using docker and launch the Gatling load tests from our local machine. Another advantage of this system is that we will be able to test different server machines (increase RAM, number of cores, etc) until we reach the performance that we need for our application. Also, depending on the type of application it will be possible to deploy the application using multiple containers and use a load balancer, so our application will be more scalable. 
+
+Once we have the recorder configured, and the application running (server and webapp), we can start recording our first test. We must specify a package and class name. This is just for test organization. Package will be a folder and Class name the name of the test. In my case I have used `profileviewer` and `LoadTestLoginExample`. I have also pressed the button `No static resources` so the file won't get to complex with two many petitions. After pressing start the recorder will start capturing our actions in the browser. So here you should perform all the the actions that you want to record. In this example we will be recording the login process. Here is the resulting file, in [Scala](https://www.scala-lang.org/).
+
+**Important note**: This test assume that we have created the acccount testaccount/Testaccount_123 in our solid server. Also that we have configured the `hosts` file so this profile is accesibile.
+
+#### **`gatlingdir/user-files/simulations/profileviewer/LoadTestLoginExample.scala`**
+```scala
+package profileviewer
+
+import scala.concurrent.duration._
+
+import io.gatling.core.Predef._
+import io.gatling.http.Predef._
+import io.gatling.jdbc.Predef._
+
+class LoadTestLoginExample extends Simulation {
+
+	val httpProtocol = http
+		.baseUrl("https://localhost:8443")
+		.inferHtmlResources(BlackList(""".*\.js""", """.*\.css""", """.*\.gif""", """.*\.jpeg""", """.*\.jpg""", """.*\.ico""", """.*\.woff""", """.*\.woff2""", """.*\.(t|o)tf""", """.*\.png""", """.*detectportal\.firefox\.com.*"""), WhiteList())
+		.acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+		.acceptEncodingHeader("gzip, deflate")
+		.acceptLanguageHeader("en-US,en;q=0.5")
+		.doNotTrackHeader("1")
+		.upgradeInsecureRequestsHeader("1")
+		.userAgentHeader("Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0")
+
+	val headers_1 = Map("Origin" -> "https://localhost:8443")
+
+	val scn = scenario("LoadTestLoginExample")
+		.exec(http("request_0")
+			.get("/authorize?scope=openid&client_id=b8076921b541837d3effb125238882ed&response_type=id_token%20token&request=eyJhbGciOiJub25lIn0.eyJyZWRpcmVjdF91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvcG9wdXAuaHRtbCIsImRpc3BsYXkiOiJwYWdlIiwibm9uY2UiOiIzdGZ4MURZUElsbTBpRUlLa25EQjJROUFobUd4dUtXVXJRTWlzek4zOGo4Iiwia2V5Ijp7ImFsZyI6IlJTMjU2IiwiZSI6IkFRQUIiLCJleHQiOnRydWUsImtleV9vcHMiOlsidmVyaWZ5Il0sImt0eSI6IlJTQSIsIm4iOiIwa1k5MjdXdF9jcmZBbTJVVmJHZk9VZUVJZGNYMXlnM0JhVkNfb1lDSHhqeUZTWF92dmprbV9KQVFUOV9udmhfVVFDZ05wTkFnejNBbGJleGg4emVnd2pOZHpUOUdaN3luZWRMSTJONF95Q2s5Y0plU0JlZnNlZm9hY0xLcTA1cFNORHBhLVNDMmhxZTJwSTg2bTZCYk45Y1BSM0E5azlmaDVqcnZqTmFKT2c1Z0pwdXhmY21faGlIUFhZMno3NXc5OVNQR3lsX0hCNmQ4eG9XN3BXdjBJNHBORmpBS0JzYjlqUmVuMHlQVHQyd1JDZ3Y0bzBmTnMyWG9ScUNXS0h3dUp5c0xCUjkzOXBYZUNqOWw2VWk3TVlGdnJsS2FlcUFFZzdFc3dlNWtBaE9qbGsxR2VhR3B0UkNXSzlqRlB4RllmRnQzbGV3QlJ0NE5xLXpBNklSalEifX0.&state=WRhXyLc-xvN647woQD22RnxJ39nw5IFsPTjmWr3ksv0"))
+		.pause(1,5)
+		.exec(http("request_1")
+			.post("/login/password")
+			.headers(headers_1)
+			.formParam("username", "testaccount")
+			.formParam("password", "Test_account123")
+			.formParam("response_type", "id_token token")
+			.formParam("display", "")
+			.formParam("scope", "openid")
+			.formParam("client_id", "b8076921b541837d3effb125238882ed")
+			.formParam("redirect_uri", "http://localhost:3000/popup.html")
+			.formParam("state", "WRhXyLc-xvN647woQD22RnxJ39nw5IFsPTjmWr3ksv0")
+			.formParam("nonce", "")
+			.formParam("request", "eyJhbGciOiJub25lIn0.eyJyZWRpcmVjdF91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvcG9wdXAuaHRtbCIsImRpc3BsYXkiOiJwYWdlIiwibm9uY2UiOiIzdGZ4MURZUElsbTBpRUlLa25EQjJROUFobUd4dUtXVXJRTWlzek4zOGo4Iiwia2V5Ijp7ImFsZyI6IlJTMjU2IiwiZSI6IkFRQUIiLCJleHQiOnRydWUsImtleV9vcHMiOlsidmVyaWZ5Il0sImt0eSI6IlJTQSIsIm4iOiIwa1k5MjdXdF9jcmZBbTJVVmJHZk9VZUVJZGNYMXlnM0JhVkNfb1lDSHhqeUZTWF92dmprbV9KQVFUOV9udmhfVVFDZ05wTkFnejNBbGJleGg4emVnd2pOZHpUOUdaN3luZWRMSTJONF95Q2s5Y0plU0JlZnNlZm9hY0xLcTA1cFNORHBhLVNDMmhxZTJwSTg2bTZCYk45Y1BSM0E5azlmaDVqcnZqTmFKT2c1Z0pwdXhmY21faGlIUFhZMno3NXc5OVNQR3lsX0hCNmQ4eG9XN3BXdjBJNHBORmpBS0JzYjlqUmVuMHlQVHQyd1JDZ3Y0bzBmTnMyWG9ScUNXS0h3dUp5c0xCUjkzOXBYZUNqOWw2VWk3TVlGdnJsS2FlcUFFZzdFc3dlNWtBaE9qbGsxR2VhR3B0UkNXSzlqRlB4RllmRnQzbGV3QlJ0NE5xLXpBNklSalEifX0."))
+
+	setUp(scn.inject(atOnceUsers(20))).protocols(httpProtocol)
+}
+```
+
+The only two things that I have touched in this file is the `pause` function calls. I have set them to be an interval between 1 an 5 seconds, and also, the `atOnceUsers` function parameter. This is a critical parameter that we will have to adjust depending our requirements.
+
+Now that we have a test, we can execute it:
+
+```bash
+./gatling.sh -s profileviewer.LoadTestLoginExample
+```
+The results will be then stored in the results folder. For instance for our 20 users simulation:
+
+![Gatling with 20 users](images/gatling20.png?raw=true "Gatling 20 users")
+
+and if we change the simulation to 50 users:
+
+![Gatling with 50 users](images/gatling50.png?raw=true "Gatling 50 users")
+
+we can see how the response times start to degrade. Obviously the results page provides us with much more information that we can analyze.
+
+### Using docker to execute the load tests
+Here is another option to execute the tests. We are going to use docker-compose to start the server and the web, and then launch the tests. Here is how it will be done, starting with the previous docker-compose file.
+
+#### **`docker-compose.yml`**
+```
+version: '3'
+services:
+  solidserver:
+    build: ./node-solid-server/
+    volumes:
+      - ./volumes/soliddata:/usr/src/app/data
+      - ./volumes/soliddb:/usr/src/app/.db
+    ports:
+      - "8443:8443"
+  sampleweb:
+    build: ./profile-viewer-react/
+    ports:
+      - "3000:3000"
+  gatling:
+    image: denvazh/gatling
+    command: -s profileviewer.LoadTestLoginExample
+    depends_on:
+      - solidserver
+      - sampleweb
+    volumes:
+      - absolutepathtogatling/conf:/opt/gatling/conf
+      - absolutepathtogatling/user-files:/opt/gatling/user-files
+      - absolutepathtogatling/results:/opt/gatling/results
+    network_mode: "host"
+volumes:
+  soliddata:
+    external: false
+  soliddb:
+    external: false
+```
+A few notes about this file:
+- We have defined a third service that depends on the other two (we want to wait that the solid server and the website are launched before starting the test.
+- This service is based on the `denvazh/gatling`. It is not updated to the last gatling version but it works. We always have the option of building our own gatling image based on his `Dockerfile` if we need to.
+- With command we can pass parameters to `gatling.sh`, so we can decide which tests to execute.
+- The `network_mode` should be established to `host` for this service. That means that this container will be able to access the host network, thus, it will be able to access http://localhost:3000 and https://localhost:8443.
+
+Finally, in order to run the tests we only need to run:
+`docker-compose up`

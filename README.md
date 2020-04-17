@@ -152,11 +152,15 @@ In order to use Gatling for doing the load tests in our application we need to [
 
 Once we have downloaded Gatling we need to start the [recorder](https://gatling.io/docs/current/http/recorder). This works as a proxy that intercepts all the actions that we make in our browser. That means that we have to configure our browser to use a proxy. We have to follow this steps:
 
-1. 
+1. Configure the recorder in **HTTP proxy mode**.
+2. Configure the **HTTPs mode** to Certificate Authority.
+3. Generate a **CA certificate** and key. For this, press the Generate CA button. You will have to choose a folder to generate the certificates. Two pem files will be generated.
+4. Configure Firefox to use this **CA certificate** (Preferences>Certificates, import the generated certificate).
+5. Configure Firefox to use a **proxy** (Preferences>Network configuration). The proxy will be localhost:8000.
+6. Configure Firefox so it uses this proxy even if the call is to a local address. In order to do this, we need to set the property `network.proxy.allow_hijacking_localhost` to `true` in `about:config`. 
+
 
 ![Gatling proxy](images/gatling1.png?raw=true "Gatling 1")
-
-In this case the proxy will work in the port 8000. Now we need to tell Firefox that we want to use this proxy. Here is important to note that Firefox by deffault will not use a proxy if the address is localhost. In order to do this, we need to set the property `network.proxy.allow_hijacking_localhost` to `true` in `about:config`. 
 
 **Important note**: We are setting this example having the application in the same machine than Gatling. This is not a good practice as Gatling generates overhead in the machine that affect the tests. One good way of doing the test is using a service like Amazon AWS or Google Cloud. This way we can deploy the application there using docker and launch the Gatling load tests from our local machine. Another advantage of this system is that we will be able to test different server machines (increase RAM, number of cores, etc) until we reach the performance that we need for our application. Also, depending on the type of application it will be possible to deploy the application using multiple containers and use a load balancer, so our application will be more scalable. 
 
